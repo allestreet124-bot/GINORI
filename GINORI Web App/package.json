@@ -1,0 +1,10 @@
+{
+  "name": "ginori-1735-dataverse-contacts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Azure Static Web App per gestione contatti GINORI 1735 su Dynamics 365 Dataverse.",
+  "scripts": {
+    "generate:config": "node scripts/generate-runtime-config.mjs",
+    "test": "node tests/contact-id-column.test.mjs"
+  }
+}

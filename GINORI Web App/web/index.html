@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GINORI 1735 | Profili Cliente</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="./assets/favicon/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon/favicon-16x16.png" />
+    <link rel="manifest" href="./assets/favicon/site.webmanifest" />
+    <link rel="mask-icon" href="./assets/favicon/safari-pinned-tab.svg" color="#000000" />
+    <link rel="shortcut icon" href="./assets/favicon/favicon-16x16.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./src/styles.css" />
+    <script src="./config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.26.1/lib/msal-browser.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script defer src="./src/app.js"></script>
+  </head>
+  <body>
+    <div id="appSplash" class="app-splash" role="status" aria-live="polite">
+      <img class="app-splash-logo" src="./assets/ginori-crown-dark.svg" alt="GINORI 1735" decoding="sync" loading="eager" fetchpriority="high" />
+    </div>
+
+    <header class="app-header">
+      <div class="header-inner">
+        <a class="brand" href="./" aria-label="GINORI 1735">
+          <img id="headerLogoFull" class="brand-logo brand-logo-full" src="./assets/logo_full_white_transparent.png" alt="GINORI 1735" decoding="sync" loading="eager" fetchpriority="high" />
+          <img id="headerLogoMark" class="brand-logo brand-logo-mark" src="./assets/logo_full_white_transparent.png" alt="GINORI 1735" decoding="sync" loading="eager" fetchpriority="high" />
+        </a>
+        <span class="header-title" data-i18n="app.title">PROFILI CLIENTE</span>
+
+        <nav class="nav-actions" aria-label="Azioni account">
+          <div id="languageSwitch" class="language-switch" aria-label="Lingua">
+            <button class="language-switch-button" type="button" data-language="it" aria-pressed="true">IT</button>
+            <button class="language-switch-button" type="button" data-language="en" aria-pressed="false">EN</button>
+          </div>
+          <button id="userMenuButton" class="user-block" type="button" aria-haspopup="menu" aria-expanded="false" hidden>
+            <span id="userInitials" class="user-initials" aria-hidden="true"></span>
+            <span id="userName" class="user-name"></span>
+          </button>
+          <div id="accountMenu" class="account-menu" role="menu" hidden>
+            <div class="account-menu-top">
+              <button id="menuLogoutButton" class="menu-link" type="button" role="menuitem" data-i18n="account.logout">Esci</button>
+            </div>
+            <div class="account-menu-profile">
+              <span id="menuUserInitials" class="menu-user-initials" aria-hidden="true"></span>
+              <div class="menu-user-details">
+                <strong id="menuUserName"></strong>
+                <span id="menuUserEmail"></span>
+              </div>
+            </div>
+            <button id="switchAccountButton" class="switch-account" type="button" role="menuitem">
+              <span class="switch-account-icon" aria-hidden="true"><i data-lucide="user-plus"></i></span>
+              <span data-i18n="account.switch">Accedi con un altro account</span>
+            </button>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <section id="signedOutView" class="auth-view">
+        <div>
+          <h1>
+            <span data-i18n="app.titleCase">Profili Cliente</span>
+            <img class="auth-wordmark" src="./assets/ginori-1735-wordmark-dark.svg" alt="GINORI 1735" decoding="sync" loading="eager" fetchpriority="high" />
+          </h1>
+          <p class="lede" data-i18n="auth.lede">Accedi con Azure AD per visualizzare, creare e modificare i profili cliente.</p>
+          <button id="heroLoginButton" class="button button-primary" type="button">
+            <i data-lucide="log-in" aria-hidden="true"></i>
+            <span data-i18n="button.login">Accedi</span>
+          </button>
+        </div>
+      </section>
+
+      <section id="contactsView" class="contacts-view" hidden>
+        <div class="page-heading page-heading-compact">
+          <img class="list-wordmark" src="./assets/ginori-1735-wordmark-dark.svg" alt="GINORI 1735" decoding="sync" loading="eager" fetchpriority="high" />
+          <div class="heading-actions">
+            <label class="list-search" for="listSearchInput">
+              <i data-lucide="search" aria-hidden="true"></i>
+              <input id="listSearchInput" type="search" inputmode="search" autocomplete="off" placeholder="Cerca" data-i18n-placeholder="search.placeholder" aria-label="Cerca nei profili cliente filtrati" />
+            </label>
+            <div class="heading-action-buttons">
+              <button id="advancedFilterButton" class="button button-ghost" type="button">
+                <i data-lucide="sliders-horizontal" aria-hidden="true"></i>
+                <span data-i18n="button.filter">Filtro</span>
+              </button>
+              <button id="mobileSortButton" class="button button-ghost mobile-sort-button" type="button">
+                <i data-lucide="arrow-up-down" aria-hidden="true"></i>
+                <span data-i18n="button.sort">Ordina</span>
+              </button>
+              <button id="refreshButton" class="button button-ghost" type="button">
+                <i data-lucide="refresh-cw" aria-hidden="true"></i>
+                <span data-i18n="button.refresh">Aggiorna</span>
+              </button>
+              <button id="newContactButton" class="button button-primary" type="button">
+                <i data-lucide="plus" aria-hidden="true"></i>
+                <span data-i18n="button.new">Nuovo</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="statusMessage" class="status-message" role="status" aria-live="polite"></div>
+
+        <div class="table-shell">
+          <div id="listLoadingOverlay" class="list-loading-overlay" hidden>
+            <span class="loading-spinner" aria-label="Caricamento"></span>
+          </div>
+          <table>
+            <colgroup>
+              <col class="col-firstname" />
+              <col class="col-lastname" />
+              <col class="col-email" />
+              <col class="col-phone" />
+              <col class="col-contact-id" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>
+                  <button class="column-menu-button" type="button" data-column-field="firstname" data-column-label="Nome" aria-haspopup="menu" aria-expanded="false">
+                    <i data-lucide="user" aria-hidden="true"></i>
+                    <span data-i18n="field.firstName">Nome</span>
+                    <span class="column-filter-indicator" aria-hidden="true"><i data-lucide="filter"></i></span>
+                    <span class="sort-indicator" aria-hidden="true"></span>
+                    <span class="column-caret" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th>
+                  <button class="column-menu-button" type="button" data-column-field="lastname" data-column-label="Cognome" aria-haspopup="menu" aria-expanded="false">
+                    <i data-lucide="user-round" aria-hidden="true"></i>
+                    <span data-i18n="field.lastName">Cognome</span>
+                    <span class="column-filter-indicator" aria-hidden="true"><i data-lucide="filter"></i></span>
+                    <span class="sort-indicator" aria-hidden="true"></span>
+                    <span class="column-caret" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th>
+                  <button class="column-menu-button" type="button" data-column-field="emailaddress1" data-column-label="Email" aria-haspopup="menu" aria-expanded="false">
+                    <i data-lucide="mail" aria-hidden="true"></i>
+                    <span data-i18n="field.email">Email</span>
+                    <span class="column-filter-indicator" aria-hidden="true"><i data-lucide="filter"></i></span>
+                    <span class="sort-indicator" aria-hidden="true"></span>
+                    <span class="column-caret" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th>
+                  <button class="column-menu-button" type="button" data-column-field="telephone1" data-column-label="Telefono" aria-haspopup="menu" aria-expanded="false">
+                    <i data-lucide="phone" aria-hidden="true"></i>
+                    <span data-i18n="field.phone">Telefono</span>
+                    <span class="column-filter-indicator" aria-hidden="true"><i data-lucide="filter"></i></span>
+                    <span class="sort-indicator" aria-hidden="true"></span>
+                    <span class="column-caret" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th>
+                  <button class="column-menu-button" type="button" data-column-field="contactIdText" data-column-label="Contact ID" aria-haspopup="menu" aria-expanded="false">
+                    <i data-lucide="copy" aria-hidden="true"></i>
+                    <span>Contact ID</span>
+                    <span class="column-filter-indicator" aria-hidden="true"><i data-lucide="filter"></i></span>
+                    <span class="sort-indicator" aria-hidden="true"></span>
+                    <span class="column-caret" aria-hidden="true"></span>
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="contactsTableBody"></tbody>
+          </table>
+          <div id="emptyState" class="empty-state" hidden><span data-i18n="list.empty">Nessun profilo cliente trovato.</span></div>
+        </div>
+        <div id="contactsSentinel" class="contacts-sentinel" aria-hidden="true">
+          <span id="contactsSpinner" class="loading-spinner" hidden></span>
+        </div>
+        <div id="columnMenu" class="column-menu" role="menu" hidden>
+          <button class="column-menu-item" type="button" data-column-action="sort-asc" role="menuitem">
+            <span class="menu-check" aria-hidden="true"></span>
+            <span class="menu-icon" aria-hidden="true"><i data-lucide="arrow-up"></i></span>
+            <span>Dalla A alla Z</span>
+          </button>
+          <button class="column-menu-item" type="button" data-column-action="sort-desc" role="menuitem">
+            <span class="menu-check" aria-hidden="true"></span>
+            <span class="menu-icon" aria-hidden="true"><i data-lucide="arrow-down"></i></span>
+            <span>Dalla Z alla A</span>
+          </button>
+          <button class="column-menu-item" type="button" data-column-action="filter" role="menuitem">
+            <span class="menu-check" aria-hidden="true"></span>
+            <span class="menu-icon" aria-hidden="true"><i data-lucide="filter"></i></span>
+            <span>Filtra per</span>
+          </button>
+          <div id="columnFilterPanel" class="column-filter-panel" hidden>
+            <div class="filter-panel-header">
+              <strong>Filtra per</strong>
+              <button id="closeFilterPanelButton" class="icon-button icon-button-small" type="button" aria-label="Chiudi filtro">
+                <i data-lucide="x" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div id="columnFilterOperatorSelect" class="custom-filter-select">
+              <input id="columnFilterOperator" type="hidden" value="eq" />
+              <button class="custom-filter-select-button" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Operatore">
+                <span>È uguale a</span>
+              </button>
+              <div class="custom-filter-select-menu" role="listbox" hidden>
+              </div>
+            </div>
+            <input id="columnFilterInput" type="search" />
+            <div class="column-filter-actions">
+              <button id="applyFilterButton" class="button button-primary button-small" type="button">
+                <i data-lucide="check" aria-hidden="true"></i>
+                <span>Applica</span>
+              </button>
+              <button id="clearFilterButton" class="button button-ghost button-small" type="button">
+                <i data-lucide="x" aria-hidden="true"></i>
+                <span>Cancella</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="advancedFilterDialog" class="advanced-filter-dialog">
+      <form id="advancedFilterForm" method="dialog" class="advanced-filter-form">
+        <div class="advanced-filter-header">
+          <div>
+            <h2>Modifica filtri: Profili Cliente</h2>
+            <div class="advanced-filter-toolbar">
+              <button id="clearAdvancedFiltersButton" class="menu-link" type="button">
+                <i data-lucide="filter-x" aria-hidden="true"></i>
+                <span>Elimina tutti i filtri</span>
+              </button>
+            </div>
+          </div>
+          <button id="closeAdvancedFilterButton" class="icon-button" type="button" aria-label="Chiudi filtri">
+            <i data-lucide="x" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="advanced-filter-body">
+          <div class="filter-builder">
+            <span class="filter-logic" aria-label="Logica filtri">AND</span>
+            <div class="filter-builder-grid filter-builder-head" aria-hidden="true">
+              <span></span>
+              <strong>Campo</strong>
+              <strong>Operatore</strong>
+              <strong>Valore</strong>
+              <span></span>
+            </div>
+            <div id="advancedFilterRows" class="advanced-filter-rows"></div>
+            <button id="addAdvancedFilterRowButton" class="add-filter-row" type="button">
+              <i data-lucide="plus" aria-hidden="true"></i>
+              <span>Aggiungi</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="advanced-filter-footer">
+          <button id="applyAdvancedFiltersButton" class="button button-primary" type="submit">
+            <i data-lucide="check" aria-hidden="true"></i>
+            <span>Applica</span>
+          </button>
+          <button id="cancelAdvancedFiltersButton" class="button button-ghost" type="button">
+            <i data-lucide="x" aria-hidden="true"></i>
+            <span>Annulla</span>
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="mobileSortDialog" class="mobile-sort-dialog">
+      <form id="mobileSortForm" method="dialog" class="mobile-sort-form">
+        <div class="advanced-filter-header">
+          <div>
+            <h2>Ordina Profili Cliente</h2>
+          </div>
+          <button id="closeMobileSortButton" class="icon-button" type="button" aria-label="Chiudi ordinamento">
+            <i data-lucide="x" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="mobile-sort-body">
+          <label>
+            <span><i data-lucide="columns-3" aria-hidden="true"></i>Campo</span>
+            <div id="mobileSortFieldSelect" class="custom-filter-select">
+              <input id="mobileSortField" type="hidden" value="lastname" />
+              <button class="custom-filter-select-button" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Campo ordinamento">
+                <span data-i18n="field.lastName">Cognome</span>
+              </button>
+              <div class="custom-filter-select-menu" role="listbox" hidden></div>
+            </div>
+          </label>
+          <label>
+            <span><i data-lucide="arrow-up-down" aria-hidden="true"></i>Direzione</span>
+            <div id="mobileSortDirectionSelect" class="custom-filter-select">
+              <input id="mobileSortDirection" type="hidden" value="asc" />
+              <button class="custom-filter-select-button" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Direzione ordinamento">
+                <span>Dalla A alla Z</span>
+              </button>
+              <div class="custom-filter-select-menu" role="listbox" hidden></div>
+            </div>
+          </label>
+        </div>
+        <div class="advanced-filter-footer">
+          <button id="applyMobileSortButton" class="button button-primary" type="submit">
+            <i data-lucide="check" aria-hidden="true"></i>
+            <span>Applica</span>
+          </button>
+          <button id="cancelMobileSortButton" class="button button-ghost" type="button">
+            <i data-lucide="x" aria-hidden="true"></i>
+            <span>Annulla</span>
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toastMessage" class="toast-message" role="status" aria-live="polite" hidden></div>
+
+    <dialog id="contactDialog" class="contact-dialog legacy-contact-dialog" hidden aria-hidden="true">
+      <form id="contactForm" method="dialog" class="contact-form">
+        <div class="dialog-header">
+          <div>
+            <h2 id="dialogTitle">Digital Customer Card</h2>
+          </div>
+          <button id="closeDialogButton" class="icon-button" value="cancel" type="button" aria-label="Chiudi">
+            <i data-lucide="x" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="form-sections">
+          <section class="form-section" aria-labelledby="profileSectionTitle">
+            <h3 id="profileSectionTitle">INFORMAZIONI DI PROFILO</h3>
+            <div class="form-grid">
+              <label>
+                <span data-i18n="field.salutation"><i data-lucide="badge-user" aria-hidden="true"></i> Titolo</span>
+                <div class="custom-filter-select form-custom-select" data-form-select="salutation">
+                  <input id="salutationInput" name="gin_salutation" type="hidden" />
+                  <button class="custom-filter-select-button" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Titolo">
+                    <span></span>
+                  </button>
+                  <div class="custom-filter-select-menu" role="listbox" hidden></div>
+                </div>
+              </label>
+              <label>
+                <span data-i18n="field.firstNameRequired"><i data-lucide="user" aria-hidden="true"></i> Nome <em class="required-mark" aria-label="obbligatorio">*</em></span>
+                <input id="firstNameInput" name="firstname" autocomplete="given-name" required />
+              </label>
+              <label>
+                <span data-i18n="field.lastNameRequired"><i data-lucide="user-round" aria-hidden="true"></i> Cognome <em class="required-mark" aria-label="obbligatorio">*</em></span>
+                <input id="lastNameInput" name="lastname" autocomplete="family-name" required />
+              </label>
+              <label class="country-lookup">
+                <span data-i18n="field.residenceCountryRequired"><i data-lucide="map-pin" aria-hidden="true"></i> Paese di Residenza <em class="required-mark" aria-label="obbligatorio">*</em></span>
+                <input id="countryOfResidenceInput" name="gin_countryofresidence" type="search" placeholder="Cerca paese" autocomplete="off" required />
+                <div id="countryOfResidenceResults" class="account-results country-results" hidden></div>
+              </label>
+              <label>
+                <span data-i18n="field.birthDateRequired"><i data-lucide="calendar" aria-hidden="true"></i> Data di Nascita <em class="required-mark" aria-label="obbligatorio">*</em></span>
+                <input id="birthDateInput" class="date-picker-input" name="birthdate" type="text" placeholder="GG/MM/AAAA" autocomplete="off" inputmode="none" required />
+              </label>
+              <div class="form-wide account-lookup">
+                <span class="field-label"><i data-lucide="building-2" aria-hidden="true"></i> Account</span>
+                <div id="selectedAccountCard" class="account-card" hidden>
+                  <i data-lucide="building-2" aria-hidden="true"></i>
+                  <div>
+                    <strong id="selectedAccountName"></strong>
+                    <span id="selectedAccountId"></span>
+                  </div>
+                  <button id="clearAccountButton" class="icon-button icon-button-small" type="button" aria-label="Rimuovi account">
+                    <i data-lucide="x" aria-hidden="true"></i>
+                  </button>
+                </div>
+                <input id="accountSearchInput" type="search" placeholder="Cerca account per nome" autocomplete="off" />
+                <div id="accountResults" class="account-results" hidden></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-section" aria-labelledby="contactSectionTitle">
+            <h3 id="contactSectionTitle">INFORMAZIONI DI COMUNICAZIONE</h3>
+            <div class="form-grid">
+              <label>
+                <span data-i18n="field.emailRequired"><i data-lucide="mail" aria-hidden="true"></i> Email <em class="required-mark" aria-label="obbligatorio">*</em></span>
+                <input id="emailInput" name="emailaddress1" type="email" autocomplete="email" required />
+              </label>
+              <label>
+                <span data-i18n="field.address"><i data-lucide="map" aria-hidden="true"></i> Indirizzo</span>
+                <input id="addressLine1Input" name="address1_line1" autocomplete="address-line1" />
+              </label>
+              <label>
+                <span data-i18n="field.city"><i data-lucide="building" aria-hidden="true"></i> Città</span>
+                <input id="addressCityInput" name="address1_city" autocomplete="address-level2" />
+              </label>
+              <label>
+                <span data-i18n="field.postalCode"><i data-lucide="mailbox" aria-hidden="true"></i> CAP/ZIP CODE</span>
+                <input id="addressPostalCodeInput" name="address1_postalcode" autocomplete="postal-code" />
+              </label>
+              <label>
+                <span data-i18n="field.state"><i data-lucide="map-pinned" aria-hidden="true"></i> STATO/PROVINCIA/REGIONE</span>
+                <input id="addressStateInput" name="address1_stateorprovince" autocomplete="address-level1" />
+              </label>
+              <label class="country-lookup">
+                <span data-i18n="field.country"><i data-lucide="globe-2" aria-hidden="true"></i> Nazione</span>
+                <input id="addressCountryInput" name="gin_address1_countryid" type="search" placeholder="Cerca nazione" autocomplete="off" />
+                <div id="addressCountryResults" class="account-results country-results" hidden></div>
+              </label>
+              <label>
+                <span data-i18n="field.mobile"><i data-lucide="smartphone" aria-hidden="true"></i> Cellulare</span>
+                <input id="mobilePhoneInput" name="mobilephone" autocomplete="tel" />
+              </label>
+              <label>
+                <span data-i18n="field.wechat"><i data-lucide="message-circle" aria-hidden="true"></i> WeChat</span>
+                <input id="wechatInput" name="gin_wechat" autocomplete="off" />
+              </label>
+              <label class="form-wide">
+                <span data-i18n="field.preferredContact"><i data-lucide="messages-square" aria-hidden="true"></i> Metodo di contatto preferita</span>
+                <div class="custom-filter-select form-custom-select" data-form-select="preferred-contact-method">
+                  <input id="preferredContactMethodInput" name="preferredcontactmethodcode" type="hidden" />
+                  <button class="custom-filter-select-button" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Metodo di contatto preferita">
+                    <span></span>
+                  </button>
+                  <div class="custom-filter-select-menu" role="listbox" hidden></div>
+                </div>
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section" aria-labelledby="privacySectionTitle">
+            <h3 id="privacySectionTitle">PRIVACY</h3>
+            <div class="privacy-options">
+              <label>
+                <span data-i18n="field.privacyDate"><i data-lucide="calendar-clock" aria-hidden="true"></i> Data Ricezione Consenso Privacy <em class="required-mark" aria-label="obbligatorio">*</em></span>
+                <input id="privacyConsentReceivedDateInput" class="date-picker-input" name="new_dataricezioneconsenso" type="text" placeholder="GG/MM/AAAA" autocomplete="off" inputmode="none" required />
+              </label>
+              <label id="privacyConsentField" class="toggle-field">
+                <input id="privacyConsentInput" name="new_consensoprivacy" type="checkbox" required />
+                <span data-i18n="field.privacyConsentText"><i data-lucide="shield-check" aria-hidden="true"></i> Ho letto e compreso la informativa sulla privacy e acconsento di creare il mio profilo Ginori <em class="required-mark" aria-label="obbligatorio">*</em></span>
+              </label>
+              <label id="marketingConsentField" class="toggle-field">
+                <input id="marketingConsentInput" name="gin_consensomarketing" type="checkbox" />
+                <span data-i18n="field.marketingConsentText"><i data-lucide="megaphone" aria-hidden="true"></i> Accetto di ricevere aggiornamenti sulle nuove attività, prodotti esclusivi, servizi personalizzati di GINORI 1735 e ad avere un'esperienza personalizzata sulla base dei miei interessi.</span>
+              </label>
+              <label id="profilingConsentField" class="toggle-field">
+                <input id="profilingConsentInput" name="gin_consensoprofilazione" type="checkbox" />
+                <span data-i18n="field.profilingConsentText"><i data-lucide="scan-face" aria-hidden="true"></i> Comprendo che Richard Ginori S.r.l trarrà inferenze sulla base delle mie informazioni di profilo (profilazione)</span>
+              </label>
+              <label id="thirdPartyConsentField" class="toggle-field">
+                <input id="thirdPartyConsentInput" name="gin_consensoterzeparti" type="checkbox" />
+                <span data-i18n="field.thirdPartyConsent"><i data-lucide="handshake" aria-hidden="true"></i> Consenso Terze Parti</span>
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <div id="formError" class="form-error" role="alert" hidden></div>
+
+        <div class="dialog-actions">
+          <button id="cancelButton" class="button button-ghost" type="button">
+            <i data-lucide="x" aria-hidden="true"></i>
+            <span>Annulla</span>
+          </button>
+          <button id="saveContactButton" class="button button-primary" type="submit">
+            <i data-lucide="save" aria-hidden="true"></i>
+            <span data-i18n="button.save">Salva</span>
+          </button>
+        </div>
+
+        <div id="contactSavingOverlay" class="contact-saving-overlay" role="status" aria-live="polite" hidden>
+          <div class="premium-spinner" aria-hidden="true"></div>
+          <span>Salvataggio in corso</span>
+        </div>
+      </form>
+    </dialog>
+    <section id="contactPageView" class="contact-page-view" hidden>
+      <div class="contact-page-shell">
+<form id="contactPageForm" method="dialog" class="contact-form contact-page-form">
+        <div class="dialog-header">
+          <div>
+            <h2 id="contactPageTitle" data-i18n="card.title">Digital Customer Card</h2>
+          </div>
+          <button id="closeContactPageButton" class="icon-button" value="cancel" type="button" aria-label="Chiudi">
+            <i data-lucide="x" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="form-sections">
+          <section class="form-section" aria-labelledby="contactPageProfileSectionTitle">
+            <h3 id="contactPageProfileSectionTitle" data-i18n="section.profile">INFORMAZIONI DI PROFILO</h3>
+            <div class="form-grid">
+              <label>
+                <span data-i18n="field.salutation"><i data-lucide="badge-user" aria-hidden="true"></i> Titolo</span>
+                <div class="custom-filter-select form-custom-select" data-form-select="salutation">
+                  <input id="contactPageSalutationInput" name="gin_salutation" type="hidden" />
+                  <button class="custom-filter-select-button" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Titolo">
+                    <span></span>
+                  </button>
+                  <div class="custom-filter-select-menu" role="listbox" hidden></div>
+                </div>
+              </label>
+              <label>
+                <span data-i18n="field.firstNameRequired"><i data-lucide="user" aria-hidden="true"></i> Nome <em class="required-mark" aria-label="obbligatorio">*</em></span>
+                <input id="contactPageFirstNameInput" name="firstname" autocomplete="given-name" required />
+              </label>
+              <label>
+                <span data-i18n="field.lastNameRequired"><i data-lucide="user-round" aria-hidden="true"></i> Cognome <em class="required-mark" aria-label="obbligatorio">*</em></span>
+                <input id="contactPageLastNameInput" name="lastname" autocomplete="family-name" required />
+              </label>
+              <label class="country-lookup">
+                <span data-i18n="field.residenceCountryRequired"><i data-lucide="map-pin" aria-hidden="true"></i> Paese di Residenza <em class="required-mark" aria-label="obbligatorio">*</em></span>
+                <input id="contactPageCountryOfResidenceInput" name="gin_countryofresidence" type="search" placeholder="Cerca paese" autocomplete="off" required />
+                <div id="contactPageCountryOfResidenceResults" class="account-results country-results" hidden></div>
+              </label>
+              <label>
+                <span data-i18n="field.birthDateRequired"><i data-lucide="calendar" aria-hidden="true"></i> Data di Nascita <em class="required-mark" aria-label="obbligatorio">*</em></span>
+                <input id="contactPageBirthDateInput" class="date-picker-input" name="birthdate" type="text" placeholder="GG/MM/AAAA" autocomplete="off" inputmode="none" required />
+              </label>
+              <div id="contactPageContactIdField" class="readonly-profile-field readonly-contact-id-field" hidden>
+                <span class="field-label"><i data-lucide="fingerprint" aria-hidden="true"></i> Contact ID</span>
+                <button id="contactPageContactIdCopyButton" class="readonly-contact-id-copy" type="button">
+                  <output id="contactPageContactIdOutput"></output>
+                </button>
+              </div>
+              <div id="contactPageQrCodeField" class="form-wide readonly-profile-field readonly-profile-qr-field" hidden>
+                <span class="field-label"><i data-lucide="qr-code" aria-hidden="true"></i> QR Code</span>
+                <img id="contactPageQrCodeImage" alt="QR Code" hidden />
+              </div>
+              <div class="form-wide account-lookup">
+                <span class="field-label"><i data-lucide="building-2" aria-hidden="true"></i> Account</span>
+                <div id="contactPageSelectedAccountCard" class="account-card" hidden>
+                  <i data-lucide="building-2" aria-hidden="true"></i>
+                  <div>
+                    <strong id="contactPageSelectedAccountName"></strong>
+                    <span id="contactPageSelectedAccountId"></span>
+                  </div>
+                  <button id="contactPageClearAccountButton" class="icon-button icon-button-small" type="button" aria-label="Rimuovi account">
+                    <i data-lucide="x" aria-hidden="true"></i>
+                  </button>
+                </div>
+                <input id="contactPageAccountSearchInput" type="search" placeholder="Cerca account per nome" autocomplete="off" />
+                <div id="contactPageAccountResults" class="account-results" hidden></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="form-section" aria-labelledby="contactPageContactSectionTitle">
+            <h3 id="contactPageContactSectionTitle" data-i18n="section.contact">INFORMAZIONI DI COMUNICAZIONE</h3>
+            <div class="form-grid">
+              <label>
+                <span data-i18n="field.emailRequired"><i data-lucide="mail" aria-hidden="true"></i> Email <em class="required-mark" aria-label="obbligatorio">*</em></span>
+                <input id="contactPageEmailInput" name="emailaddress1" type="email" autocomplete="email" required />
+              </label>
+              <label>
+                <span data-i18n="field.address"><i data-lucide="map" aria-hidden="true"></i> Indirizzo</span>
+                <input id="contactPageAddressLine1Input" name="address1_line1" autocomplete="address-line1" />
+              </label>
+              <label>
+                <span data-i18n="field.city"><i data-lucide="building" aria-hidden="true"></i> Città</span>
+                <input id="contactPageAddressCityInput" name="address1_city" autocomplete="address-level2" />
+              </label>
+              <label>
+                <span data-i18n="field.postalCode"><i data-lucide="mailbox" aria-hidden="true"></i> CAP/ZIP CODE</span>
+                <input id="contactPageAddressPostalCodeInput" name="address1_postalcode" autocomplete="postal-code" />
+              </label>
+              <label>
+                <span data-i18n="field.state"><i data-lucide="map-pinned" aria-hidden="true"></i> STATO/PROVINCIA/REGIONE</span>
+                <input id="contactPageAddressStateInput" name="address1_stateorprovince" autocomplete="address-level1" />
+              </label>
+              <label class="country-lookup">
+                <span data-i18n="field.country"><i data-lucide="globe-2" aria-hidden="true"></i> Nazione</span>
+                <input id="contactPageAddressCountryInput" name="gin_address1_countryid" type="search" placeholder="Cerca nazione" autocomplete="off" />
+                <div id="contactPageAddressCountryResults" class="account-results country-results" hidden></div>
+              </label>
+              <label>
+                <span data-i18n="field.mobile"><i data-lucide="smartphone" aria-hidden="true"></i> Cellulare</span>
+                <input id="contactPageMobilePhoneInput" name="mobilephone" autocomplete="tel" />
+              </label>
+              <label>
+                <span data-i18n="field.wechat"><i data-lucide="message-circle" aria-hidden="true"></i> WeChat</span>
+                <input id="contactPageWechatInput" name="gin_wechat" autocomplete="off" />
+              </label>
+              <label class="form-wide">
+                <span data-i18n="field.preferredContact"><i data-lucide="messages-square" aria-hidden="true"></i> Metodo di contatto preferita</span>
+                <div class="custom-filter-select form-custom-select" data-form-select="preferred-contact-method">
+                  <input id="contactPagePreferredContactMethodInput" name="preferredcontactmethodcode" type="hidden" />
+                  <button class="custom-filter-select-button" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Metodo di contatto preferita">
+                    <span></span>
+                  </button>
+                  <div class="custom-filter-select-menu" role="listbox" hidden></div>
+                </div>
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section" aria-labelledby="contactPagePrivacySectionTitle">
+            <h3 id="contactPagePrivacySectionTitle" data-i18n="section.privacy">PRIVACY</h3>
+            <p id="contactPagePrivacyText" class="privacy-intro" hidden></p>
+            <p id="contactPagePrivacyIntro" class="privacy-intro" hidden></p>
+            <div class="privacy-options">
+              <label>
+                <span data-i18n="field.privacyDate"><i data-lucide="calendar-clock" aria-hidden="true"></i> Data Ricezione Consenso Privacy <em class="required-mark" aria-label="obbligatorio">*</em></span>
+                <input id="contactPagePrivacyConsentReceivedDateInput" class="date-picker-input" name="new_dataricezioneconsenso" type="text" placeholder="GG/MM/AAAA" autocomplete="off" inputmode="none" required />
+              </label>
+              <label id="contactPagePrivacyConsentField" class="toggle-field">
+                <input id="contactPagePrivacyConsentInput" name="new_consensoprivacy" type="checkbox" required />
+                <span><i data-lucide="shield-check" aria-hidden="true"></i><span id="contactPagePrivacyConsentText" class="privacy-label-text">Ho letto e compreso la informativa sulla privacy e acconsento di creare il mio profilo Ginori</span><em class="required-mark" aria-label="obbligatorio">*</em></span>
+              </label>
+              <label id="contactPageMarketingConsentField" class="toggle-field">
+                <input id="contactPageMarketingConsentInput" name="gin_consensomarketing" type="checkbox" />
+                <span><i data-lucide="megaphone" aria-hidden="true"></i><span id="contactPageMarketingConsentText" class="privacy-label-text">Accetto di ricevere aggiornamenti sulle nuove attività, prodotti esclusivi, servizi personalizzati di GINORI 1735 e ad avere un'esperienza personalizzata sulla base dei miei interessi.</span></span>
+              </label>
+              <label id="contactPageProfilingConsentField" class="toggle-field">
+                <input id="contactPageProfilingConsentInput" name="gin_consensoprofilazione" type="checkbox" />
+                <span><i data-lucide="scan-face" aria-hidden="true"></i><span id="contactPageProfilingConsentText" class="privacy-label-text">Comprendo che Richard Ginori S.r.l trarrà inferenze sulla base delle mie informazioni di profilo (profilazione)</span></span>
+              </label>
+              <label id="contactPageThirdPartyConsentField" class="toggle-field">
+                <input id="contactPageThirdPartyConsentInput" name="gin_consensoterzeparti" type="checkbox" />
+                <span><i data-lucide="handshake" aria-hidden="true"></i><span id="contactPageThirdPartyConsentText" class="privacy-label-text">Consenso Terze Parti</span></span>
+              </label>
+            </div>
+            <p id="contactPagePrivacyFooter" class="privacy-intro privacy-footer" hidden></p>
+          </section>
+        </div>
+
+        <div id="contactPageFormError" class="form-error" role="alert" hidden></div>
+
+        <div class="dialog-actions">
+          <button id="contactPageSaveContactButton" class="button button-primary" type="submit">
+            <i data-lucide="save" aria-hidden="true"></i>
+            <span data-i18n="button.save">Salva</span>
+          </button>
+        </div>
+
+        <div id="contactPageSavingOverlay" class="contact-saving-overlay" role="status" aria-live="polite" hidden>
+          <div class="premium-spinner" aria-hidden="true"></div>
+          <span>Salvataggio in corso</span>
+        </div>
+      </form>
+      </div>
+    </section>
+
+    <dialog id="contactPasswordDialog" class="password-dialog">
+      <form id="contactPasswordForm" class="password-form" method="dialog">
+        <div class="password-header">
+          <h2 data-i18n="password.title">Conferma operazione</h2>
+          <button id="closePasswordDialogButton" class="icon-button" type="button" aria-label="Chiudi">
+            <i data-lucide="x" aria-hidden="true"></i>
+          </button>
+        </div>
+        <label class="password-field">
+          <span data-i18n="password.label">Inserisci password</span>
+          <input id="contactPasswordInput" type="password" autocomplete="off" required />
+        </label>
+        <div id="contactPasswordError" class="form-error" role="alert" hidden></div>
+        <div class="dialog-actions password-actions">
+          <button id="confirmPasswordButton" class="button button-primary" type="submit">
+            <i data-lucide="check" aria-hidden="true"></i>
+            <span data-i18n="button.confirm">Conferma</span>
+          </button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>
