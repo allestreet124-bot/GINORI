@@ -36,14 +36,16 @@ for (const variant of variants) {
 
   assert.match(
     html,
-    /class="header-title" data-i18n="app\.title">PROFILI CLIENTE TEST<\/span>/,
-    `${variant.name}: sandbox marker appears in the header fallback`
+    /class="header-title" data-i18n="app\.title">PROFILI CLIENTE<\/span>/,
+    `${variant.name}: customer profiles title appears in the header fallback`
   );
   assert.match(
     js,
-    /it:\s*{[\s\S]*?"app\.title":\s*"PROFILI CLIENTE TEST"/,
-    `${variant.name}: sandbox marker appears in the Italian header translation`
+    /it:\s*{[\s\S]*?"app\.title":\s*"PROFILI CLIENTE"/,
+    `${variant.name}: customer profiles title appears in the Italian header translation`
   );
+  assert.doesNotMatch(html, /PROFILI CLIENTE TEST/, `${variant.name}: test marker is absent from the header fallback`);
+  assert.doesNotMatch(js, /"app\.title":\s*"PROFILI CLIENTE TEST"/, `${variant.name}: test marker is absent from translations`);
   assert.doesNotMatch(html, /�|Ã/, `${variant.name}: HTML has no mojibake or replacement characters`);
   assert.match(html, /Città/, `${variant.name}: city label keeps accented a`);
   assert.match(html, /data-i18n="field\.city"/, `${variant.name}: city label is wired to translations`);

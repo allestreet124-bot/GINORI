@@ -68,7 +68,7 @@
   const activeContactRouteStorageKey = "ginoriActiveContactRoute";
   const translations = {
     it: {
-      "app.title": "PROFILI CLIENTE TEST",
+      "app.title": "PROFILI CLIENTE",
       "app.titleCase": "Profili Cliente",
       "auth.lede": "Accedi con Azure AD per visualizzare, creare e modificare i profili cliente.",
       "account.logout": "Esci",
