@@ -34,6 +34,16 @@ for (const variant of variants) {
   const js = readFileSync(join(variant.base, "src", "app.js"), "utf8");
   const css = readFileSync(join(variant.base, "src", "styles.css"), "utf8");
 
+  assert.match(
+    html,
+    /class="header-title" data-i18n="app\.title">PROFILI CLIENTE TEST<\/span>/,
+    `${variant.name}: sandbox marker appears in the header fallback`
+  );
+  assert.match(
+    js,
+    /it:\s*{[\s\S]*?"app\.title":\s*"PROFILI CLIENTE TEST"/,
+    `${variant.name}: sandbox marker appears in the Italian header translation`
+  );
   assert.doesNotMatch(html, /�|Ã/, `${variant.name}: HTML has no mojibake or replacement characters`);
   assert.match(html, /Città/, `${variant.name}: city label keeps accented a`);
   assert.match(html, /data-i18n="field\.city"/, `${variant.name}: city label is wired to translations`);
